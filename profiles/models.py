@@ -15,6 +15,9 @@ class Profile(models.Model):
 
     user = models.OneToOneField(User, verbose_name='user', on_delete=models.CASCADE,  related_name='profile')
 
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} ({self.user.username})"
+
 
 class Address(models.Model):
     province = models.CharField(max_length=50)
@@ -26,12 +29,18 @@ class Address(models.Model):
 
     profile = models.ForeignKey(Profile, verbose_name='profile', on_delete=models.CASCADE,  related_name='address')
 
+    def __str__(self):
+        return f"{self.street}, {self.barangay}, {self.municipality}, {self.province} ({self.postal_code}) - ({self.profile.user.username})"
+
 
 class Contact(models.Model):
     type = models.CharField(max_length=15, choices=contact_options)
     value = models.CharField(max_length=30)
 
     profile = models.ForeignKey(Profile, verbose_name='profile', on_delete=models.CASCADE, related_name='contact')
+
+    def __str__(self):
+        return f"{self.type}: {self.value} ({self.profile.user.username})"
 
 
 class Student(models.Model):
@@ -40,12 +49,19 @@ class Student(models.Model):
 
     profile = models.OneToOneField(Profile, verbose_name='profile', on_delete=models.CASCADE, related_name='student')
 
+    def __str__(self):
+        return f"{self.profile.first_name} {self.profile.last_name} ({self.profile.user.username})"
+
 
 class Guardian(models.Model):
     occupation = models.CharField(max_length=30)
+    relationship = models.CharField(max_length=30, null=True, blank=True)
     
     profile = models.OneToOneField(Profile, verbose_name='profile', on_delete=models.CASCADE, related_name='guardian')
     children = models.ManyToManyField(Student, verbose_name='children', related_name='guardian')
+
+    def __str__(self):
+        return f"{self.profile.first_name} {self.profile.last_name} ({self.profile.user.username}) - Guardian of {self.children.first().profile.first_name} {self.children.first().profile.last_name}"
 
 
 class Parent(models.Model):
@@ -53,3 +69,6 @@ class Parent(models.Model):
     
     profile = models.OneToOneField(Profile, verbose_name='profile', on_delete=models.CASCADE, related_name='parent')
     children = models.ManyToManyField(Student, verbose_name='children', related_name='parent')
+
+    def __str__(self):
+        return f"{self.profile.first_name} {self.profile.last_name} ({self.profile.user.username}) - Parent"
